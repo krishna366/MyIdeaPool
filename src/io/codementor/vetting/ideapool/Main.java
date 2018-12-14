@@ -85,8 +85,11 @@ public class Main {
         	}
         	
         	
-        	return new Gson().toJson(
-        		      new StandardResponse(responseStatus,responseMessage));
+        	//return new Gson().toJson(
+        	//	      new StandardResponse(responseStatus,responseMessage));
+        	
+        	halt(401,"Refresh Token Missing.");
+        	return "";
         	
         });
         
@@ -116,7 +119,7 @@ public class Main {
         		User u = userServiceImpl.getUser(email, password);
         		
         		if(u == null) {
-        			responseStatus = 402;
+        			responseStatus = 401;
             		responseMessage = "Invalid Credentials.";
             		
             		halt(responseStatus,responseMessage);
@@ -130,15 +133,18 @@ public class Main {
                 keyValuePair.put("jwt", token.getJwt());
                 
                 
-        		responseStatus = 200;
+        		responseStatus = 201;
         		res.status(responseStatus);
         		//System.out.println(new Gson().toJson(keyValuePair));
         		return new Gson().toJson(keyValuePair);
         	}
         	
-        	responseStatus = 200;
-        	return new Gson().toJson(
-        		      new StandardResponse(responseStatus,responseMessage));
+        	//responseStatus = 200;
+        	//return new Gson().toJson(
+        	//	      new StandardResponse(responseStatus,responseMessage));
+        	
+        	halt(422,"Required parameters Missing.");
+        	return "";
         });        
   
         delete("/access-tokens", (req,res)->{
@@ -167,7 +173,7 @@ public class Main {
         		
         		User u = tokenServiceImpl.getUserFromJWTToken(jwt);
         		if(u == null) {
-        			responseStatus = 402;
+        			responseStatus = 401;
             		responseMessage = "Invalid Token.";
             		
             		halt(responseStatus,responseMessage);
@@ -175,15 +181,18 @@ public class Main {
         		
         		userServiceImpl.logoutUser(u);
         		
-        		responseStatus = 200;
+        		responseStatus = 204;
         		res.status(responseStatus);
         		responseMessage = "";
         		
         		return "";
         	}
         	
-        	return new Gson().toJson(
-      		      new StandardResponse(responseStatus,responseMessage));
+        	//return new Gson().toJson(
+      		//      new StandardResponse(responseStatus,responseMessage));
+        	
+        	halt(422,"Required parameters Missing.");
+        	return "";
         });
 
         post("/users", (req,res)->{
@@ -217,6 +226,23 @@ public class Main {
         			halt(responseStatus,responseMessage);
         		}
         		
+        		if(password.length() < 8) halt(422,"Password should be at least 8 characters, including 1 uppercase letter, 1 lowercase letter, and 1 number");
+        		
+        		boolean upperCaseExists = false;
+        		boolean lowerCaseExists = false;
+        		boolean numberExists = false;
+        		
+        		for(int i=0;i<password.length();++i) {
+        			char ch = password.charAt(i);
+        			if(ch >= 'A' && ch <= 'Z') upperCaseExists = true;
+        			if(ch >= 'a' && ch <= 'z') lowerCaseExists = true;
+        			if(ch >= '0' && ch <= '9') numberExists = true;
+        		}
+        			
+        		if(!upperCaseExists || !lowerCaseExists || !numberExists)
+        			halt(422,"Password should be at least 8 characters, including 1 uppercase letter, 1 lowercase letter, and 1 number");
+        		
+        		
         		//System.out.println(name+" "+email+" "+password);
         		User u = userServiceImpl.createUser(name, email, password);
         		
@@ -234,7 +260,7 @@ public class Main {
                 keyValuePair.put("jwt", token.getJwt());
                 
                 
-        		responseStatus = 200;
+        		responseStatus = 201;
         		res.status(responseStatus);
         		//System.out.println(new Gson().toJson(keyValuePair));
         		return new Gson().toJson(keyValuePair);
@@ -242,8 +268,11 @@ public class Main {
         	}
         	
         	
-        	return new Gson().toJson(
-        		      new StandardResponse(responseStatus,responseMessage));
+        	//return new Gson().toJson(
+        	//	      new StandardResponse(responseStatus,responseMessage));
+        	
+        	halt(422,"Required parameters Missing.");
+        	return "";
         	
         });  
         
@@ -290,8 +319,11 @@ public class Main {
           		//      new StandardResponse(responseStatus,new Gson().toJsonTree(u)));
         	}
         	
-        	return new Gson().toJson(
-      		      new StandardResponse(responseStatus,responseMessage));
+        	//return new Gson().toJson(
+      		//      new StandardResponse(responseStatus,responseMessage));
+        	
+        	halt(422,"Required parameters Missing.");
+        	return "";
         	
         });        
         
@@ -328,7 +360,7 @@ public class Main {
         		//confidence = Integer.parseInt(jsonReq.getString("confidence"));
         		
         	}catch(Exception e) {
-        		e.printStackTrace();
+        		//e.printStackTrace();
         		responseStatus = 402;
         		responseMessage = "Required parameters are missing.";
         		halt(responseStatus,responseMessage);
@@ -346,6 +378,14 @@ public class Main {
             		
             		halt(responseStatus,responseMessage);
         		}
+        		
+        		if(content.length() > 255) halt(422,"Idea content should be less than 255 char.");
+        		
+        		if(impact > 10 || impact < 1) halt(422,"Idea impact should be between 1 and 10.");
+        		
+        		if(ease > 10 || ease < 1) halt(422,"Idea ease should be between 1 and 10.");
+        		
+        		if(confidence > 10 || confidence < 1) halt(422,"Idea confidence should be between 1 and 10.");
         		  
         		Idea idea = ideaServiceImpl.createIdea(content, impact, ease, confidence, u);
         		
@@ -370,7 +410,7 @@ public class Main {
         		return new Gson().toJson(keyValuePair);
         		*/
           		
-          		responseStatus = 200;
+          		responseStatus = 201;
           		res.status(responseStatus);
           		
           		JSONObject jsonObj = new JSONObject();
@@ -380,7 +420,7 @@ public class Main {
           		jsonObj.put("confidence", idea.getConfidence());
           		jsonObj.put("id",idea.getId() );
           		jsonObj.put("average_score", idea.getAverage());
-          		jsonObj.put("created_at",idea.getCreatedAt().toInstant().toEpochMilli());
+          		jsonObj.put("created_at",idea.getCreatedAt().toInstant().toEpochMilli()/1000);
           		
           		return jsonObj;
           		
@@ -388,8 +428,10 @@ public class Main {
           		//      new StandardResponse(responseStatus,new Gson().toJsonTree(idea)));
         	}
         	
-        	return new Gson().toJson(
-      		      new StandardResponse(responseStatus,responseMessage));
+        	//return new Gson().toJson(
+      		//      new StandardResponse(responseStatus,responseMessage));
+        	halt(422,"Required parameters Missing.");
+        	return "";
         	
         });
         
@@ -434,18 +476,28 @@ public class Main {
             		halt(responseStatus,responseMessage);
         		}
         		
-        		//Idea idea = ideaServiceImpl.getIdea(id);
+        		
+        		
+        		Idea idea = ideaServiceImpl.getIdea(id);
+        		if(idea == null) halt(422,"Unable to find the idea.");
+        		if(!idea.getCreatedBy().equals(u.getId()))
+        			halt(422,"You are not authorized to delete this idea.");
+        		
+        		
         		ideaServiceImpl.deletIdea(id);
         		
-        		responseStatus = 200;
+        		responseStatus = 204;
         		res.status(responseStatus);
         		return "";
         		//return new Gson().toJson(
           		//      new StandardResponse(responseStatus,responseMessage));
         	}
         	
-        	return new Gson().toJson(
-      		      new StandardResponse(responseStatus,responseMessage));
+        	//return new Gson().toJson(
+      		//      new StandardResponse(responseStatus,responseMessage));
+          	
+        	halt(422,"Required parameters Missing.");
+        	return "";
         	
         });
         
@@ -476,10 +528,12 @@ public class Main {
         		//page = ((JSONObject)jsonReq.get("query")).getInt("page");
         	} catch(Exception e) {
         		//e.printStackTrace();
-        		responseStatus = 402;
-        		responseMessage = "Required params are missing";
+        		//responseStatus = 402;
+        		//responseMessage = "Required params are missing";
         		//System.out.println("page "+page);
-        		return new JSONArray();       		
+        		//return new JSONArray(); 
+        		
+        		page = 1;
         	}
         	
         	//System.out.println("page "+page);
@@ -496,7 +550,7 @@ public class Main {
             		halt(responseStatus,responseMessage);
         		}
         		
-        		List<Idea> ideas = ideaServiceImpl.getIdeas(page);
+        		List<Idea> ideas = ideaServiceImpl.getIdeas(page,u);
         		
         		responseStatus = 200;
         		
@@ -512,7 +566,7 @@ public class Main {
               		jsonObj.put("ease", i.getEase());
               		jsonObj.put("confidence", i.getConfidence());
               		jsonObj.put("average_score", i.getAverage());
-              		jsonObj.put("created_at",i.getCreatedAt().toInstant().toEpochMilli());
+              		jsonObj.put("created_at",i.getCreatedAt().toInstant().toEpochMilli()/1000);
               		jsonArray.put(jsonObj);
         		}
         		//System.out.println(jsonArray.toString());
@@ -521,8 +575,11 @@ public class Main {
           		//      new StandardResponse(responseStatus,new Gson().toJsonTree(ideas)));
         	}
         	
-        	return new Gson().toJson(
-      		      new StandardResponse(responseStatus,responseMessage));
+        	//return new Gson().toJson(
+      		//      new StandardResponse(responseStatus,responseMessage));
+        	
+        	halt(422,"Required parameters Missing.");
+        	return "";
         	
         });
         
@@ -576,8 +633,23 @@ public class Main {
               		halt(responseStatus,responseMessage);
           		}
           		  
-          		//Idea idea = ideaServiceImpl.getIdea(id);
-          		Idea idea = ideaServiceImpl.updateIdea(id,content, impact, ease, confidence, u);
+          		if(content.length() > 255) halt(422,"Idea content should be less than 255 char.");
+        		
+        		if(impact > 10 || impact < 1) halt(422,"Idea impact should be between 1 and 10.");
+        		
+        		if(ease > 10 || ease < 1) halt(422,"Idea ease should be between 1 and 10.");
+        		
+        		if(confidence > 10 || confidence < 1) halt(422,"Idea confidence should be between 1 and 10.");
+        		 
+          		
+          		Idea idea = ideaServiceImpl.getIdea(id);
+          		
+          		if(idea == null) halt(422,"Unable to find the idea.");
+          		
+        		if(!idea.getCreatedBy().equals(u.getId()))
+        			halt(422,"You are not authorized to modify this idea.");
+          		
+          		idea = ideaServiceImpl.updateIdea(id,content, impact, ease, confidence, u);
           		
           		if(idea == null) {
           			responseStatus = 403;
@@ -607,12 +679,15 @@ public class Main {
           		jsonObj.put("ease", idea.getEase());
           		jsonObj.put("confidence", idea.getConfidence());
           		jsonObj.put("average_score", idea.getAverage());
-          		jsonObj.put("created_at",idea.getCreatedAt().toInstant().toEpochMilli());
+          		jsonObj.put("created_at",idea.getCreatedAt().toInstant().toEpochMilli()/1000);
           		return jsonObj;
           	}
           	
-          	return new Gson().toJson(
-        		      new StandardResponse(responseStatus,responseMessage));
+          	//return new Gson().toJson(
+        	//	      new StandardResponse(responseStatus,responseMessage));
+          	
+        	halt(422,"Required parameters Missing.");
+        	return "";
         });
         
       

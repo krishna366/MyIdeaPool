@@ -24,9 +24,13 @@ public class IdeaServiceImpl implements IdeaService{
 	public void deletIdea(String id) {
 		IdeaCRUD.deleteIdea(id);
 	}
-	public List<Idea> getIdeas(int page){
+	public List<Idea> getIdeas(int page,User u){
 		
-		return IdeaCRUD.getIdeas(page);
+		return IdeaCRUD.getIdeas(page,u.getId());
+	}
+	
+	public Idea getIdea(String id) {
+		return IdeaCRUD.getIdea(id);
 	}
 	
 }

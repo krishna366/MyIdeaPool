@@ -28,6 +28,7 @@ public class IdeaCRUD extends AbstractCRUD{
 											"WHERE id = :id";
 	
 	private final static String SQL_SELECT_MULTI = "SELECT id,content,impact,ease,confidence,created_by,created_at,last_updated_by,last_modified_at,(impact + ease + confidence)/3 average FROM `ideapool`.`ideas` "+
+													"where created_by = :createdBy "+
 													"order by created_at desc "+
 													"LIMIT :offset,:count";
 	
@@ -118,13 +119,14 @@ public class IdeaCRUD extends AbstractCRUD{
 		
 	}
 	
-	public static List<Idea> getIdeas(int page) {
+	public static List<Idea> getIdeas(int page,String createdBy) {
 		
 		Connection connection = getOpenedConnection();
 		
 		try {
 			
 			List<Idea> ideas = connection.createQuery(SQL_SELECT_MULTI)
+					.addParameter("createdBy",createdBy)
 					.addParameter("offset", (page - 1) * 10)
 					.addParameter("count", 10)
 					.executeAndFetch(Idea.class);
@@ -168,12 +170,14 @@ public class IdeaCRUD extends AbstractCRUD{
 		System.out.println(IdeaCRUD.getIdea(id2));
 		
 		System.out.println(IdeaCRUD.getIdea(id3));
-		*/
+		
 		List<Idea> ideas1 = IdeaCRUD.getIdeas(1);
 		List<Idea> ideas2 = IdeaCRUD.getIdeas(2);
 		
 		for(Idea i:ideas1) System.out.println(i);
 		for(Idea i:ideas2) System.out.println(i);
+		
+		*/
 	}
 	
 }

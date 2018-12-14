@@ -15,7 +15,7 @@ UNIQUE KEY 'refresh_token' ( 'refresh_token' )
 
 CREATE TABLE 'ideapool'.'ideas' (
 'id' int( 11 ) NOT NULL AUTO_INCREMENT ,
-'content' varchar( 100 ) NOT NULL ,
+'content' varchar( 255 ) NOT NULL ,
 'impact' int(3) not null,
 'ease' int(3) not null,
 'confidence' int(3) not null,
