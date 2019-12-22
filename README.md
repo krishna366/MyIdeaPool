@@ -1,8 +1,7 @@
 # MyIdeaPool
 
-This project is created for CodeMentorX evaluation process.
 
-I am supposed to build a REST API as mentioned in the assignment spec.
+I am supposed to build a REST API as mentioned in one assignment spec.
 
 I am supposed to use Java to build this backend.
 
